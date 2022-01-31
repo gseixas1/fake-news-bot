@@ -1,0 +1,52 @@
+package com.suyash.autoreply;
+
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.provider.Settings;
+
+import androidx.fragment.app.Fragment;
+
+public class NotificationListenerUtils {
+
+    public static final int REQ_NOTIFICATION_LISTENER = 123;
+    private final static String LISTENER_SERVICE_CONNECTED = "LISTENER_SERVICE_CONNECTED";
+    private static final String TAG = "NotificationListener";
+
+
+
+    public static void setListenerConnected(Context context, boolean listenerConnected) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(TAG, Context.MODE_MULTI_PROCESS).edit();
+        editor.putBoolean(LISTENER_SERVICE_CONNECTED, listenerConnected);
+        editor.commit();
+    }
+
+    public static boolean isListenerConnected(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(TAG, Context.MODE_MULTI_PROCESS);
+        return sp.getBoolean(LISTENER_SERVICE_CONNECTED, false);
+    }
+
+
+    public static boolean isListenerEnabled(Context context, Class notificationListenerCls) {
+        ComponentName cn = new ComponentName(context, notificationListenerCls);
+        String flat = Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
+        return flat != null && flat.contains(cn.flattenToString());
+    }
+
+    public static void launchNotificationAccessSettings(Activity activity) {
+        Intent i = new Intent(VersionUtils.isJellyBeanMR2()
+                ? "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+                : Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        activity.startActivityForResult(i, REQ_NOTIFICATION_LISTENER);
+    }
+
+    public static void launchNotificationAccessSettings(Fragment fragment) {
+        Intent i = new Intent(VersionUtils.isJellyBeanMR2()
+                ? "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+                : Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        fragment.startActivityForResult(i, REQ_NOTIFICATION_LISTENER);
+    }
+
+}
